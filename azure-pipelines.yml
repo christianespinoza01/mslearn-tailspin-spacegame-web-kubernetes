@@ -67,6 +67,19 @@ stages:
       vmImage: 'ubuntu-20.04'
     steps:  
     - checkout: self
+
+    - task: PowerShell@2
+      displayName: Build
+      inputs:
+        targetType: inline
+        pwsh: true
+        script: |
+          $directory = Split-Path -Path ${{ parameters.projPath }}
+          Set-Location $directory 
+
+          our-build-tool restore
+          our-build-tool build
+
     - task: KubernetesManifest@1
       displayName: Create imagePullSecret
       inputs:
