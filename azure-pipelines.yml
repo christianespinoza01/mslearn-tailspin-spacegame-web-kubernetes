@@ -50,24 +50,21 @@ stages:
     displayName: Deploy
     pool:
       vmImage: 'ubuntu-20.04'
-    environment: 'spike.default'
+    environment: 'Dev'
     variables:
     - group: Release
     strategy:
       runOnce:
         deploy:
           steps:
-
           - download: current
             artifact: manifests
-
+            
   - job: 'Building'
     displayName: 'Build manifest'
     pool:
       vmImage: 'ubuntu-20.04'
     steps:  
-    - checkout: self
-
     - task: KubernetesManifest@1
       displayName: Create imagePullSecret
       inputs:
@@ -79,10 +76,7 @@ stages:
         azureResourceGroup: 'tailspin-space-game-rg'
         kubernetesCluster: 'tailspinspacegame-27800'
         namespace: 'default'
-
-    - script: dir $(Build.SourcesDirectory)/manifests
-      displayName: 'Cloning Manifest Files From Repo'
-      
+        
     - task: KubernetesManifest@1
       displayName: Deploy to Kubernetes cluster
       inputs:
