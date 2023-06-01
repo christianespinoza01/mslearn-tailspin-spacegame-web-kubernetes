@@ -17,7 +17,7 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
     steps:
-    - task: Docker@2
+    - task: Kubernetes@1
       displayName: 'Build and push the image to container registry'
       inputs:
         command: buildAndPush
@@ -28,7 +28,7 @@ stages:
         tags: |
           $(tag)
           
-    - task: Docker@2
+    - task: Kubernetes@1
       displayName: 'Build and push the leaderboard image to container registry'
       inputs:
         command: buildAndPush
