@@ -50,48 +50,42 @@ stages:
     displayName: Deploy
     pool:
       vmImage: 'ubuntu-20.04'
-    environment: 'spike.default'
+    environment: 'Dev'
     variables:
     - group: Release
     strategy:
       runOnce:
         deploy:
           steps:
+          - checkout: self
           - download: current
             artifact: manifests
-            
-- stage: 'Manifest'
-  jobs:  
-  - job: 'Building'
-    displayName: 'Build manifest'
-    pool:
-      vmImage: 'ubuntu-20.04'
-    steps:  
-    - task: KubernetesManifest@1
-      displayName: Create imagePullSecret
-      inputs:
-        action: createSecret
-        connectionType: kubernetesServiceConnection
-        secretName: $(imagePullSecret)
-        dockerRegistryEndpoint: 'Container Registry Connection'
-        azureSubscriptionConnection: 'Kubernetes Cluster Connection'
-        azureResourceGroup: 'tailspin-space-game-rg'
-        kubernetesCluster: 'tailspinspacegame-27800'
-        namespace: 'default'
-    - task: KubernetesManifest@1
-      displayName: Deploy to Kubernetes cluster
-      inputs:
-        action: deploy
-        connectionType: kubernetesServiceConnection
-        azureSubscriptionConnection: 'Kubernetes Cluster Connection'
-        azureResourceGroup: 'tailspin-space-game-rg'
-        kubernetesCluster: 'tailspinspacegame-27800'
-        namespace: 'default'
-        manifests: |
-          $(Pipeline.Workspace)/manifests/deployment.yml
-          $(Pipeline.Workspace)/manifests/service.yml
-        imagePullSecrets: |
-          $(imagePullSecret)
-        containers: |
-          $(RegistryName)/$(webRepository):$(tag)
-          $(RegistryName)/$(leaderboardRepository):$(tag)
+          - task: KubernetesManifest@1
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              connectionType: azureResourceManager
+              secretName: $(imagePullSecret)
+              dockerRegistryEndpoint: 'Container Registry Connection'
+              azureSubscriptionConnection: 'Kubernetes Cluster Connection'
+              azureResourceGroup: 'tailspin-space-game-rg'
+              kubernetesCluster: 'tailspinspacegame-27800'
+              namespace: 'default'
+          
+          - task: KubernetesManifest@1
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              connectionType: azureResourceManager
+              azureSubscriptionConnection: 'Kubernetes Cluster Connection'
+              azureResourceGroup: 'tailspin-space-game-rg'
+              kubernetesCluster: 'tailspinspacegame-27800'
+              namespace: 'default'
+              manifests: |
+                $(Pipeline.Workspace)/manifests/deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+                imagePullSecrets: |
+                  $(imagePullSecret)
+                containers: |
+                  $(RegistryName)/$(webRepository):$(tag)
+                  $(RegistryName)/$(leaderboardRepository):$(tag)
