@@ -57,14 +57,16 @@ stages:
       runOnce:
         deploy:
           steps:
-          - checkout: self
+
           - download: current
             artifact: manifests
+
   - job: 'Building'
     displayName: 'Build manifest'
     pool:
       vmImage: 'ubuntu-20.04'
     steps:  
+    - checkout: self
     - task: KubernetesManifest@1
       displayName: Create imagePullSecret
       inputs:
